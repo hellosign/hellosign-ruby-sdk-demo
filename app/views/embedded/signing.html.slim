@@ -1,0 +1,18 @@
+h1 Embedded Signing Demo #{@sign_url}
+.embeddedSigning
+  p.intro  This page demonstrates how you can add an embedded signature request to your Ruby-based web application.
+  br/
+
+  .part
+    h2 Try it out
+    p Please sign our NDA.
+
+    = form_tag('signing', :method => :POST, :html => {:class => 'form-horizontal'})
+      input type='text' name='name' class='form-control' placeholder='Your name'
+      input type='email' name='email' class='form-control' placeholder='Your email'
+      br/
+      br/
+      input class="btn btn-primary" id="startButton" type="submit" value="Launch Demo"
+
+- if @sign_url
+  = render 'embedded_view'

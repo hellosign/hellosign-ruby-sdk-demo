@@ -1,0 +1,11 @@
+script type="text/javascript" src="//s3.amazonaws.com/cdn.hellofax.com/js/embedded.js"
+javascript:
+  alert('hello');
+  HelloSign.init("a68602781bf56ef992e2ff460c5ef3e7");
+  HelloSign.open({
+      url: "#{raw @sign_url}",
+      allowCancel: true,
+      messageListener: function(eventData) {
+          //  do something
+      }
+  });

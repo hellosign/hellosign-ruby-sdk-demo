@@ -1,0 +1,8 @@
+require 'hello_sign'
+HelloSign.configure do |config|
+  config.api_key = 'YOUR API KEY HERE'
+  config.client_id = 'YOUR CLIENT ID HERE'
+  config.client_secret = 'YOUR CLIENT SECRET HERE'
+end
+
+PDF_FILE = ['https://bitcoin.org/bitcoin.pdf']

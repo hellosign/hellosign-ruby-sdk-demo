@@ -1,0 +1,42 @@
+h1 Embedded Signing Demo
+
+.embeddedSigning
+  p.intro This page demonstrates how you can add an embedded signature request to your Ruby-based web application.
+  br/
+
+  .part
+    h2 Try it out
+    p Please sign our NDA.
+
+    = form_tag('oauth_demo', :method => :POST, :html => {:class => 'form-horizontal'})
+      input type='text' name='name' class='form-control' placeholder='Signer name'
+      input type='email' name='email' class='form-control' placeholder='Signer email'
+      br/
+      br/
+      input class="btn btn-primary" id="startButton" type="submit" value="Launch Demo"
+
+- if @sign_url
+  = render 'embedded_view'
+
+javascript:
+
+  $("#startButton").click(function() {
+      // Request an OAuth token from HelloSign
+      var win = window.open(
+              "#{raw HelloSign.oauth_url('hellosign-ruby')}",
+              "hellosign_oauth",
+              "width=600,height=400");
+
+      // Poll window to see if it's closed
+      var pollTimer = setInterval(function() {
+          if (win.closed !== false) {
+              // Cancel the polling
+              window.clearInterval(pollTimer);
+
+              // Assume we have authorization and submit
+              // the form to create the signature request
+              $('form').trigger("submit");
+          }
+      }, 200);
+      return false;
+  });

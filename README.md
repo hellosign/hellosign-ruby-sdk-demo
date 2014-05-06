@@ -4,30 +4,38 @@ HelloSign Ruby Demo App
 Introduction
 ------------
 
-This is a demo application showing you how to use the [hellosign-ruby]() gem in an application.
-This demo has 4 use cases, three on embedded and one on OAuth
+This is a demo application showing you how to use the [hellosign-ruby-sdk]() gem in an application.
+This demo has 4 use cases, three using embedded flows and one using OAuth
 
 How to setup this demo
 ----------------
 
 ####Obtain an Api key
-Sign up for an API plan [here](https://www.hellosign.com/api/pricing). Adding embedded signing to your website requires a Silver or Gold API plan.
-However, you can test the functionality for free by creating signature requests in test mode.
-####Obtain a Client ID.
-Sign up for a Client ID for your application [here](https://www.hellosign.com/oauth/createAppForm).
+You can either purchase an API plan [here](https://www.hellosign.com/api/pricing) or simply sign up for a free account and start making
+API calls in test-mode. For non test-mode, adding embedded signing to your website requires a Silver or Gold API plan,
+####Obtain a Client ID and Secret.
+Create an app [here](https://www.hellosign.com/oauth/createAppForm). If you want to demo the OAuth flow, make sure you enable OAuth for your new app by checking the appropriate boxes.
+Also, OAuth uses a callback URL which, in order to work properly, should be ONE of the following:
+ A) On a domain that you will override the DNS lookup for (see below)
+ B) Accessible through a tunnel such as Ngrok (see below)
+ C) Accessible on the public internet with
+ D) If using a typical home NAT-configured router you can use your public IP address if port-forwarding is set up correctly.
 
-**Noticed**: The OAuth callback url must be **your-demo-app-domain/oauth** to work with this demo.
+**Notice**: This demo app also expects the OAuth callback url to be of the form **your-demo-app-domain/oauth** to work properly with the internal app routing.
 ####Set the API key and Client ID in the demo app
 1.Clone the app
 
 ```bash
 git clone https://github.com/HelloFax/hellosign-ruby-sdk-demo
-cd hellosign_ruby_demo
+cd hellosign-ruby-sdk-demo
 bundle install
 ```
 
-2.Set your api key and client id
-Open config/initializers/hello_sign.rb, set your keys
+2. Copy the example config file and set your api key and client id
+
+cp config/initializers/hello_sign.rb.example config/initializers/hello_sign.rb
+
+Then set your keys in the new file you just created, it should look similar to the following:
 
 ```ruby
 HelloSign.configure do |config|
@@ -46,138 +54,49 @@ PDF_FILE = ['https://bitcoin.org/bitcoin.pdf']
 
 ```
 
-####Deploy the app
-You can't run this demo with localhost:3000 so you must deploy the demo app on [Heroku](https://heroku.com) or your own server to use it.
+####Deploy the app (optional)
+If you wish to have a publicly accessible demo app you must deploy somewhere like [Heroku](https://heroku.com).
+
+#### Start the server
+rails server (or possibly 'bundle exec rails server')
+With the server running navigate to the main page e.g. http://127.0.0.1:3000
+
+#### Callback URL setup - Ngrok option
+
+In order for the OAuth part of the app to run correctly, you need to register your HelloSign app with an OAuth callback url. If you have not deployed the app to a publicly accessible IP and/or you want to deploy the app on localhost, you may want to use Ngrok (https://ngrok.com) because `localhost` or `127.0.0.1` is not recognized as valid callback urls by HelloSign. Here's how:
+
+1. Download Ngrok (https://ngrok.com/download) and extract the zip file you've just downloaded
+
+2. Open Terminal, navigate to the folder you've just extracted Ngrok to, then run `./ngrok <port number>` where port number is the local port your web server is running on (for example, 3000 that rails BRICK defaults to).
+When Ngrok starts, it registers a random url (such as http://6eb6eb98.ngrok.com) and then forwards all traffic that reaches this url (port 80 for http or 443 for https) to your local server on the port you specified. What you need to do is to update your HelloSign settings for your app with this random url, so that the callbacks could be routed to your localhost.
 
 
-Demo explaination
+#### Callback URL setup - Modify hostfile option
+
+If you don't want to use Ngrok, you can use this option instead.
+
+1. Now change your local host configuration such that the demo app can be access via a custom domain name. For example on a linux machine Open /etc/hosts and add `127.0.0.1 my.api-demo.hellosign.com`. Visit http://my.api-demo.hellosign.com in your browser to make sure the demo app is now accessible. Then update the domain name on your HelloSign app to be my.api-demo.hellosign.com. This step is important to make the embedded signing/requesting demos work.
+
+2. Also change the HelloSign app OAuth callback url to be http://my.api-demo.hellosign.com/oauth
+
+Demo explanation
 -----------------
-Requirement: You must be have your app and setup config file for HelloSign
+Requirement: You must have your config file setup correctly with an API key, client ID, and client secret and the server running.
+
+When viewing the main page you will see 4 links which will each run a different demo.
 
 ### Embedded Signing
-In this example, you will be shown how to add an embedded signature request to your Rails app
-
-1.Create the embedded signature request.
-```ruby
-request = HelloSign.create_embedded_signature_request(
-  :title => title,
-  :subject => subject,
-  :message => message,
-  :signers => [{
-      :email_address => email_address,
-      :name => name
-    }
-  ],
-  :file_urls => ['http://example/test.pdf']
-)
-```
-2.Create embedded for this signature request
-```ruby
-embedded = HelloSign.get_embedded_sign_url :signature_id => request.signatures[0]["signature_id"]
-@embedded_url = embedded.sign_url
-```
-3.Include "embedded.js" in your html
-```html
-<script type="text/javascript" src="//s3.amazonaws.com/cdn.hellofax.com/js/embedded.js"></script>
-```
-4.Show embedded to client
-
-```html
-<script type="text/javascript">
-    function openSigningDialog() {
-        HelloSign.init("#{HelloSign.client_id}");
-        HelloSign.open({
-            url: "#{raw @embedded_url}"
-        });
-    }
-</script>
-```
+In this example, you will be shown how to add an iframe-embedded signature request to your Rails app
 
 ### Embedded Requesting
+
 Request signatures for documents directly from your website with HelloSign's embedded request capability.
-Follow the steps below to add this feature to your Rails application.
 
-Let assume you have a form to get all information from the user
+### Embedded Requesting from a Template
+Request signatures based on your pre-built HelloSign Templates. Before running this demo ensure you have at least one template setup in your
+account on the HelloSign website. Your templates will be retrieved for use in the demo when you load this page.
 
-1.Create the embedded signature request.
-In your action method
-```ruby
-request = HelloSign.create_embedded_signature_request(
-  :title => params[:title],
-  :subject => params[:subject],
-  :message => params[:message],
-  :signers => [{
-      :email_address => params[:sender_email_address],
-      :name => params[:sender_name]
-    }
-  ],
-  #We support ActionDispatch::Http::UploadedFile out of the box so you can pass params files to files option
-  :files => params[:files]
-)
-
-```
-2.Create embedded for this signature request
-```ruby
-embedded = HelloSign.get_embedded_sign_url :signature_id => request.signatures[0]["signature_id"]
-@embedded_url = embedded.sign_url
-```
-3.Include "embedded.js" in your html
-```html
-<script type="text/javascript" src="//s3.amazonaws.com/cdn.hellofax.com/js/embedded.js"></script>
-```
-4.Show embedded to client
-
-```html
-<script type="text/javascript">
-    function openSigningDialog() {
-        HelloSign.init("#{HelloSign.client_id}");
-        HelloSign.open({
-            url: "#{raw @embedded_url}"
-        });
-    }
-</script>
-```
-
-### Embedded Requesting
-Request signatures for documents based on a HelloSign Template directly from your website.
-Follow the steps below to add this feature to your Rails application.
-
-1.Create a template.
-Create a template on the HelloSign website [here](https://www.hellosign.com/home/createReusableDocs). Your templates will be retrieved for use in the demo when you load this page.
-
-Let assume you have a form to get all information from the user
-
-1.Create the embedded signature request from template.
-In your action method
-```ruby
-request = HelloSign.create_embedded_signature_request_with_reusable_form(
-  :reusable_form_id => params[:template_id],
-  :title => params[:title],
-  :subject => params[:subject],
-  :message => params[:message],
-  :signers => params[:signers],
-  :ccs => params[:signers],
-  :custom_fields => params[:custom_fields]
-)
-```
-2.Create embedded for this signature request
-```ruby
-embedded = HelloSign.get_embedded_sign_url :signature_id => request.signatures[0]["signature_id"]
-@embedded_url = embedded.sign_url
-```
-3.Include "embedded.js" in your html
-```html
-<script type="text/javascript" src="//s3.amazonaws.com/cdn.hellofax.com/js/embedded.js"></script>
-```
-4.Show embedded to client
-
-```html
-<script type="text/javascript">
-    function openSigningDialog() {
-        HelloSign.init("#{HelloSign.client_id}");
-        HelloSign.open({
-            url: "#{raw @embedded_url}"
-        });
-    }
-</script>
-```
+### OAuth Demo
+In this demo you can see the oauth flow as a user is first sent to the an oauth link on the live HelloSign website,
+asked to grant access to the 3rd party app (that's you), and then redirect back to the callback URL with access granted
+or denied according to the user's selection.

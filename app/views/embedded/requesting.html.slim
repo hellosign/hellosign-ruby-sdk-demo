@@ -1,6 +1,6 @@
 h1 Embedded Request Demo
 .embeddedSigning
-  p.intro Request signatures for documents directly from your website with HelloSign's embedded request capability. Follow the steps below to add this feature to your Java-based web application.
+  p.intro Request signatures for documents directly from your website with HelloSign's embedded request capability.\
   br/
 
   
@@ -14,40 +14,10 @@ h1 Embedded Request Demo
           input multiple="multiple" name="files[]" type="file"
 
       .control-group
-        label.control-label for='name' Your name
+        label.control-label for='requester_email_address' Your email
         .controls
-          input type='text' name='name' placeholder='Your name'
-
-      .control-group
-        label.control-label for='email' Your email
-        .controls
-          input type='email' name='email' placeholder='Your email'
+          input type='email' name='requester_email_address' placeholder='Your email'
       br/
-
-      .control-group
-        label.control-label for='signer_name' Signer name
-        .controls
-          input type='text' name='signer_name' class='form-control' placeholder='Signer name'
-
-      .control-group
-        label.control-label for='signer_email' Signer name
-        .controls
-          input type='email' name='signer_email' placeholder='Signer email'
-
-      .control-group
-        label.control-label for='subject' Title
-        .controls
-          input type='text' name='title' class='form-control' placeholder='Title(optional)'
-
-      .control-group
-        label.control-label for='subject' Subject
-        .controls
-          input type='text' name='subject' class='form-control' placeholder='Subject(optional)'
-
-      .control-group
-        label.control-label for='message' Message
-        .controls
-          textarea name='message' placeholder='Message(optional)'
 
       .control-group
         .span4

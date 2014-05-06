@@ -26,7 +26,7 @@ gem 'jbuilder', '~> 1.2'
 
 gem "twitter-bootstrap-rails"
 
-gem 'hellosign-ruby', :github => 'HelloFax/hellosign-ruby', :branch => :master
+gem 'hellosign-ruby-sdk', :github => 'HelloFax/hellosign-ruby-sdk', :branch => :master
 
 gem "slim-rails"
 group :development do

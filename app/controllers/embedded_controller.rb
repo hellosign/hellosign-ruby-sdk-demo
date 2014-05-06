@@ -4,7 +4,7 @@ class EmbeddedController < ApplicationController
 
   def create_signing
     begin
-      request = HelloSign.create_embedded_signature_request(
+      embedded_request = HelloSign.create_embedded_signature_request(
         :test_mode => 1,
         :title => 'NDA with Acme Co.',
         :subject => 'The NDA we talked about',
@@ -17,7 +17,7 @@ class EmbeddedController < ApplicationController
         :file_urls => PDF_FILE
       )
 
-      signature_id = request.signatures[0]["signature_id"]
+      signature_id = embedded_request.signatures[0].signature_id
 
       embedded = HelloSign.get_embedded_sign_url :signature_id => signature_id
       @sign_url = embedded.sign_url
@@ -34,32 +34,22 @@ class EmbeddedController < ApplicationController
     begin
       data = {
         :test_mode => 1,
-        :signers => [{
-            :email_address => params[:signer_email],
-            :name => params[:signer_name]
-          }
-        ],
+        :type => "request_signature",
+        :subject => "Embedded Signature Request",
+        :requester_email_address => "testuser@example.com",
+        :message => "This is the message that goes along with your request."
       }
 
-      if params[:title]
-        data[:title] = params[:title]
-      end
-
-      if params[:subject]
-        data[:subject] = params[:subject]
-      end
-
-      if params[:message]
-        data[:message] = params[:message]
+      if params[:requester_email_address]
+        data[:requester_email_address] = params[:requester_email_address]
       end
 
       data[:files] = params[:files]
 
-      request = HelloSign.create_embedded_signature_request data
-      signature_id = request.signatures[0]["signature_id"]
+      resp = HelloSign.create_embedded_unclaimed_draft data
+      claim_url = resp.claim_url;
 
-      embedded = HelloSign.get_embedded_sign_url :signature_id => signature_id
-      @sign_url = embedded.sign_url
+      @sign_url = claim_url
       render 'requesting'
     rescue => e
       render :text => e
@@ -67,7 +57,7 @@ class EmbeddedController < ApplicationController
   end
 
   def template_requesting
-    @templates = HelloSign.get_reusable_forms(:page => 1)
+    @templates = HelloSign.get_templates(:page => 1)
     @data = (@templates.map {|t| t.data }).to_json
   end
 
@@ -93,7 +83,7 @@ class EmbeddedController < ApplicationController
         :ccs => ccs,
         :custom_fields => params[:custom_fields]
       )
-      signature_id = request.signatures[0]["signature_id"]
+      signature_id = request.signatures[0].signature_id
 
       embedded = HelloSign.get_embedded_sign_url :signature_id => signature_id
       @sign_url = embedded.sign_url

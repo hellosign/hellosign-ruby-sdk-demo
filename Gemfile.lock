@@ -1,9 +1,9 @@
 GIT
-  remote: git://github.com/HelloFax/hellosign-ruby.git
-  revision: 8c421465c20e337b00ba5cff1da6360bcc9da0bf
+  remote: git://github.com/HelloFax/hellosign-ruby-sdk.git
+  revision: 1a68307e2961638d43bbf9f037987bc933fe3891
   branch: master
   specs:
-    hellosign-ruby (0.0.1)
+    hellosign-ruby-sdk (0.0.1)
       faraday
       multi_json
 
@@ -63,7 +63,7 @@ GEM
     method_source (0.8.2)
     mime-types (1.25.1)
     minitest (4.7.5)
-    multi_json (1.9.3)
+    multi_json (1.10.0)
     multipart-post (2.0.0)
     pg (0.17.1)
     polyglot (0.3.4)
@@ -144,7 +144,7 @@ PLATFORMS
 
 DEPENDENCIES
   coffee-rails (~> 4.0.0)
-  hellosign-ruby!
+  hellosign-ruby-sdk!
   jbuilder (~> 1.2)
   jquery-rails
   pg
